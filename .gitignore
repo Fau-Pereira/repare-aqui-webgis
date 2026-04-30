@@ -1,0 +1,7 @@
+# Ignorar ambiente virtual
+venv/
+__pycache__/
+
+# Ignorar arquivos de banco de dados locais
+*.db
+banco.db

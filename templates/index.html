@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RepareAqui - Melhorando juntos a nossa cidade</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        body { margin: 0; padding: 0; }
+        #mapa { height: 100vh; width: 100%; }
+        
+        /* Estilos adicionados para organizar o formulário dentro do popup */
+        .form-popup {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 200px;
+        }
+        .form-popup input, .form-popup select, .form-popup button {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .form-popup button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        .form-popup button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="mapa"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+       // 1. Inicializa o mapa
+        var map = L.map('mapa').setView([-12.9714, -38.5014], 13);
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        var popup = L.popup();
+
+        // 2. Função de clique no mapa (Abre o formulário)
+        function aoClicarNoMapa(e) {
+            var lat = e.latlng.lat.toFixed(5);
+            var lng = e.latlng.lng.toFixed(5);
+
+            var conteudoFormulario = `
+                <div class="form-popup">
+                    <h3 style="margin: 0;">Reportar Problema</h3>
+                    <small>Lat: ${lat} | Lng: ${lng}</small>
+                    
+                    <select id="tipo_problema">
+                        <option value="">Selecione o problema...</option>
+                        <option value="Buraco na via">Buraco na via</option>
+                        <option value="Poste apagado">Poste apagado</option>
+                        <option value="Calçada irregular">Calçada irregular</option>
+                        <option value="Acúmulo de lixo">Acúmulo de lixo</option>
+                        <option value="Árvore precisando de poda">Árvore precisando de poda</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+
+                    <input type="text" id="descricao_problema" placeholder="Detalhes adicionais (opcional)">
+                    
+                    <button onclick="prepararEnvio(${lat}, ${lng})">Registrar Ocorrência</button>
+                </div>
+            `;
+
+            popup.setLatLng(e.latlng).setContent(conteudoFormulario).openOn(map);
+        }
+
+        map.on('click', aoClicarNoMapa);
+
+        // --- NOVA FUNÇÃO ADICIONADA ---
+        // 3. Função para carregar os marcadores do banco de dados
+        function carregarOcorrencias() {
+            // Chama a nova rota que criamos no Python
+            fetch('/ocorrencias')
+                .then(response => response.json())
+                .then(dados => {
+                    // Para cada ocorrência na lista, desenha um pino
+                    dados.forEach(ocorrencia => {
+                        adicionarPinoNoMapa(ocorrencia.tipo, ocorrencia.descricao, ocorrencia.latitude, ocorrencia.longitude);
+                    });
+                });
+        }
+
+        // Função auxiliar para desenhar o pino fisicamente no mapa
+        function adicionarPinoNoMapa(tipo, descricao, lat, lng) {
+            var marcador = L.marker([lat, lng]).addTo(map);
+            
+            // Texto que aparece quando o usuário clica no pino já criado
+            var textoPopup = `<b>${tipo}</b><br>${descricao || 'Sem descrição'}`;
+            marcador.bindPopup(textoPopup);
+        }
+
+        // Executa a função assim que o site abre
+        carregarOcorrencias();
+
+        // 4. Função de envio de dados (Atualizada)
+        function prepararEnvio(lat, lng) {
+            var tipo = document.getElementById('tipo_problema').value;
+            var descricao = document.getElementById('descricao_problema').value;
+
+            if (tipo === "") {
+                alert("Por favor, selecione o tipo de problema antes de registrar.");
+                return; 
+            }
+
+            var dadosOcorrencia = {
+                tipo: tipo,
+                descricao: descricao,
+                latitude: lat,
+                longitude: lng
+            };
+
+            fetch('/registrar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dadosOcorrencia)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.mensagem);
+                map.closePopup();
+                
+                // Em vez de recarregar a página, já desenhamos o pino novo na mesma hora!
+                adicionarPinoNoMapa(tipo, descricao, lat, lng);
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert("Houve um erro ao tentar comunicar com o servidor.");
+            });
+        }
+    </script>
+</body>
+</html>
