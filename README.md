@@ -1,45 +1,86 @@
 # 🏙️ RepareAqui - Colaborando juntos para uma cidade melhor
 
-## 📖 Sobre o Projeto
-Projeto interdisciplinar unindo **Arquitetura, Urbanismo, Análise de Sistemas e Engenharia de Dados**, focado no paradigma das **Smart Cities**. A plataforma permite o mapeamento colaborativo de infraestrutura urbana (Web GIS) e a análise em lote (Batch Processing) dessas ocorrências na nuvem.
+**Versão:** 1.1.0 (Atualização: Agente de IA Integrado)
+
+O **RepareAqui** é uma plataforma WebGIS voltada para cidades inteligentes (Smart Cities). O sistema permite que cidadãos relatem problemas de infraestrutura urbana diretamente em um mapa interativo, enquanto a gestão municipal (Prefeitura) acompanha os dados através de um painel corporativo com mapas de calor (Heatmaps) e triagem automatizada.
+
+## ✨ Novidades da Versão 1.1.0
+* **Triagem com Inteligência Artificial:** Integração com LLM (Google Gemini) via LangChain. Agora, ao relatar um problema, um Agente de IA analisa a descrição em texto livre, classifica o nível de urgência e sugere automaticamente a secretaria municipal responsável.
+* **Protocolo Indestrutível:** Novo sistema de geração de protocolos únicos baseados em *timestamp*.
+* **Proteção de Sessão (Clean Code):** Implementação de *Rollback* automático no banco de dados em caso de falhas na API externa, garantindo resiliência do sistema.
 
 ## 🛠️ Tecnologias Utilizadas
-- **Frontend (Web GIS):** HTML5, CSS3, JavaScript, Leaflet.js, OpenStreetMap.
-- **Backend (API & Persistência):** Python, Flask, SQLite.
-- **Data Analytics (Big Data):** PySpark, Databricks (Serverless Compute).
 
-## 🗺️ Arquitetura e Passos de Desenvolvimento
-1. **O Mapa Básico:** Renderização cartográfica com Leaflet. ✅
-2. **A Interação:** Captura de coordenadas e formulários dinâmicos. ✅
-3. **O Backend:** API REST com Flask. ✅
-4. **Persistência de Dados:** Modelagem em banco SQLite (`INSERT` e `SELECT`). ✅
-5. **Visualização Georreferenciada:** Renderização em tempo real de marcadores no mapa. ✅
-6. **Módulo Analítico (Data Pipeline):** Script de extração de dados locais (SQLite para CSV) e processamento em nuvem utilizando PySpark para gerar métricas e visualizações interativas (`display()`) de zeladoria urbana. ✅
+**Frontend (Cidadão e Painel Corporativo)**
+* React.js (com Vite)
+* Leaflet & React-Leaflet (WebGIS)
+* Leaflet.heat (Mapa de Calor de Densidade Urbana)
+* Axios (Consumo de API)
 
-## 🚀 Como Executar o Projeto Localmente
+**Backend (API Restful)**
+* Python 3 (Flask)
+* SQLAlchemy (ORM)
+* LangChain & Google Generative AI (Agente Despachante)
+* PostgreSQL (Banco de Dados)
+
+## 🚀 Como Rodar o Projeto Localmente
 
 ### Pré-requisitos
-- Python 3.12+
-- Git
+* Node.js instalado
+* Python 3.10+ instalado
+* PostgreSQL rodando (via Docker ou instalação nativa)
 
-### Configuração Inicial
-1. Clone o repositório:
-   `git clone https://github.com/fau-pereira/repare-aqui-webgis.git`
-2. Acesse a pasta do projeto e crie o ambiente virtual:
-   `python3 -m venv venv`
-3. Ative o ambiente virtual:
-   - Linux/Mac: `source venv/bin/activate`
-   - Windows: `venv\Scripts\activate`
-4. Instale as dependências:
-   `pip install flask`
+### 1. Configurando o Banco de Dados
+Certifique-se de ter um banco de dados PostgreSQL rodando na porta `5432` com o nome `repareaqui`.
 
-### Executando a Aplicação
-1. Com o ambiente ativado, inicie o servidor:
-   `python app.py`
-2. Acesse `http://127.0.0.1:5000` no seu navegador. O banco de dados SQLite será criado automaticamente na primeira execução.
+### 2. Configurando o Backend (API)
+Abra um terminal e navegue até a pasta `backend`:
+```bash
+cd backend
+```
 
-## 📊 Como Executar o Módulo de Análise (Databricks)
-1. Execute `python exportar_dados.py` para gerar o dataset atualizado (`ocorrencias.csv`).
-2. Acesse sua conta no Databricks Workspace (Free Edition).
-3. Faça o upload do arquivo CSV para o seu Workspace.
-4. Importe o código `automacao_servidor.py` para um Notebook e execute as células para visualizar os gráficos de incidência.
+Crie e ative o ambiente virtual:
+```bash
+python -m venv venv
+source venv/bin/activate  # No Windows use: venv\Scripts\activate
+```
+
+Instale as dependências:
+```bash
+pip install -r requirements.txt
+```
+_(Certifique-se de ter as bibliotecas: flask, flask-sqlalchemy, flask-cors, psycopg2-binary, langchain, langchain-google-genai)._
+
+Crie um arquivo .env na pasta backend com as variáveis:
+```Snippet de código
+DATABASE_URL=postgresql://seu_usuario:sua_senha@localhost:5432/repareaqui
+GOOGLE_API_KEY=sua_chave_do_google_ai_studio
+```
+
+Inicie o servidor:
+```bash
+python run.py
+```
+_O backend estará rodando na porta 5000._
+
+### 3. Configurando o Frontend (Interface)
+Abra um novo terminal e navegue até a pasta 'frontend':
+```bash
+cd frontend
+```
+
+Instale as dependências do Node:
+```bash
+npm install
+```
+
+Inicie o servidor de desenvolvimento:
+```bash
+npm run dev
+```
+_O frontend estará disponível no navegador em 'http://localhost:5173'._
+
+## 🗺️ Fluxo de Uso
+1. Acesse a aplicação cidadão, clique no mapa e reporte um problema.
+2. Acompanhe o terminal do Backend para ver a IA realizando a triagem em tempo real.
+3. Acesse a rota corporativa para visualizar os chamados e o Heatmap de incidências (Mapa de Calor).
