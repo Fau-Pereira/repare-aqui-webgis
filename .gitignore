@@ -1,7 +1,25 @@
-# Ignorar ambiente virtual
-venv/
-__pycache__/
+# --------------------------
+# FRONTEND (React / Node)
+# --------------------------
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.env
+frontend/.env.local
 
-# Ignorar arquivos de banco de dados locais
-*.db
-banco.db
+# --------------------------
+# BACKEND (Python / Flask)
+# --------------------------
+backend/venv/
+backend/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+backend/.env
+
+# --------------------------
+# SISTEMA OPERACIONAL / IDE
+# --------------------------
+.DS_Store
+.vscode/
+.idea/
